@@ -37,7 +37,10 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateUser = catchAsync(async (req: Request, res: Response) => {
-  const user = await userService.updateUser(req);
+  const id = req.params.id;
+  const payload = req.body;
+  const decodedToken = req.user;
+  const user = await userService.updateUser(id, payload, decodedToken);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

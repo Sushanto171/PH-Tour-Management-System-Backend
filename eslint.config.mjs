@@ -14,6 +14,7 @@ export default tseslint.config(
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "error",
       "no-console": "warn",
+      "@typescript-eslint/no-namespace": "off",
     },
   }
 );

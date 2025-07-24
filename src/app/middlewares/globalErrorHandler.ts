@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
-import { envConfig } from "../config/env";
+import { envVars } from "../config/env";
 import { AppError } from "./../errorHelpers/AppError";
 
 export const globalErrorHandler = (
@@ -25,6 +25,6 @@ export const globalErrorHandler = (
     success: false,
     message,
     error: err,
-    stack: envConfig.NODE_ENV === "development" ? err.stack : null,
+    stack: envVars.NODE_ENV === "development" ? err.stack : null,
   });
 };
