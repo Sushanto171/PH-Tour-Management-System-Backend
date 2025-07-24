@@ -2,23 +2,27 @@
 import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
-import { envConfig } from "./app/config/env";
+import { envVars } from "./app/config/env";
+import { createSuperAdmin } from "./app/utils/seedSuperAdmin";
 
 let server: Server;
 
 const serverStart = async () => {
   try {
-    await mongoose.connect(envConfig.DB_URL);
+    await mongoose.connect(envVars.DB_URL);
     console.log("🏪 Mongodb Connection stablish");
-    server = app.listen(envConfig.PORT, () => {
-      console.log(`🔥Server running: http://localhost:${envConfig.PORT}`);
+    server = app.listen(envVars.PORT, () => {
+      console.log(`🔥Server running: http://localhost:${envVars.PORT}`);
     });
   } catch (error) {
     console.log(error);
   }
 };
 
-serverStart();
+(async () => {
+  await serverStart();
+  await createSuperAdmin();
+})();
 
 // unhandled Rejection error
 process.on("unhandledRejection", () => {

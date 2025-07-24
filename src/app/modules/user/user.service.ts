@@ -1,31 +1,88 @@
 import { Request } from "express";
-import { IUser } from "./user.interface";
+import httpStatus from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
+import { envVars } from "../../config/env";
+import { AppError } from "../../errorHelpers/AppError";
+import { generateHashedPassword } from "../../utils/bcrypt";
+import { IAuthsProvider, IUser, Role } from "./user.interface";
 import { User } from "./user.model";
 
 const createUser = async (payload: Partial<IUser>) => {
-  const { name, email } = payload;
-  const user = await User.create({ name, email });
+  const { email, password, ...rest } = payload;
+
+  const isUserExist = await User.findOne({ email });
+  if (isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "This email already exist.");
+  }
+  const authProvider: IAuthsProvider = {
+    provider: "credential",
+    providerId: email as string,
+  };
+
+  const hashedPassword = await generateHashedPassword(
+    password as string,
+    envVars.BCRYPT_SALT
+  );
+  const user = await User.create({
+    email,
+    password: hashedPassword,
+    auths: [authProvider],
+    ...rest,
+  });
   return user;
 };
 
 const getUserByEmail = async (req: Request) => {
   const email = req.params.email;
-  const user = await User.findOne({ email });
-  return user;
+  const user = await User.findOne({ email }).select("-password");
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist");
+  }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password, ...rest } = user.toObject();
+  return rest;
 };
 
-const updateUser = async (req: Request) => {
-  const email = req.params.email;
-  const data = req.body;
-  const user = await User.findOneAndUpdate({ email }, data, {
+const updateUser = async (
+  userId: string,
+  payload: Partial<IUser>,
+  decodedToken: JwtPayload
+) => {
+  const isUserExist = await User.findById(userId);
+  if (!isUserExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid user id");
+  }
+
+  if (payload.role) {
+    if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
+      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+    }
+    if (decodedToken.role === Role.ADMIN && payload.role === Role.SUPER_ADMIN) {
+      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+    }
+  }
+
+  if (payload.isActive || payload.isDeleted || payload.isVerified) {
+    if (decodedToken.role === Role.USER || decodedToken.role === Role.GUIDE) {
+      throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+    }
+  }
+
+  if (payload.password) {
+    payload.password = await generateHashedPassword(
+      payload.password,
+      envVars.BCRYPT_SALT
+    );
+  }
+  const user = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,
-  });
+  }).select("-password");
   return user;
 };
 
 const getAllUsers = async () => {
-  const users = await User.find({});
+  const users = await User.find({}).select("-password");
   const total = await User.countDocuments();
 
   const data = {
