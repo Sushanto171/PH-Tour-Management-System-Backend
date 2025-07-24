@@ -14,14 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const app_1 = __importDefault(require("./app"));
-const port = 5000;
+const env_1 = require("./app/config/env");
 let server;
 const serverStart = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield mongoose_1.default.connect("mongodb+srv://AiScholar:ivVHWFoz5w7DXhoZ@cluster0.0zizn.mongodb.net/ph-tour-management-system?retryWrites=true&w=majority&appName=Cluster0");
+        yield mongoose_1.default.connect(env_1.envConfig.DB_URL);
         console.log("🏪 Mongodb Connection stablish");
-        server = app_1.default.listen(port, () => {
-            console.log(`🔥Server running: http://localhost:${port}`);
+        server = app_1.default.listen(env_1.envConfig.PORT, () => {
+            console.log(`🔥Server running: http://localhost:${env_1.envConfig.PORT}`);
         });
     }
     catch (error) {
@@ -57,4 +57,3 @@ process.on("SIGTERM", () => {
     }
     process.exit(1);
 });
-const name = 18;
