@@ -30,14 +30,22 @@ const credentialLogin = async (payload: Partial<IUser>) => {
   const accessToken = generateJwtToken(
     jwtPayload,
     envVars.JWT_ACCESS_SECRET,
-    envVars.JWT_EXPIRESIN
+    envVars.JWT_ACCESS_EXPIRES
   );
+
+  const refreshToken = generateJwtToken(
+    jwtPayload,
+    envVars.JWT_REFRESH_SECRET,
+    envVars.JWT_REFRESH_EXPIRES
+  );
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password: _remove, ...rest } = isUserExist.toObject();
+  const { password: _remove, ...user } = isUserExist.toObject();
 
   return {
-    rest,
+    user,
     accessToken,
+    refreshToken,
   };
 };
 

@@ -21,7 +21,7 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const hashedPassword = await generateHashedPassword(
     password as string,
-    envVars.BCRYPT_SALT
+    envVars.BCRYPT_SALT_ROUND
   );
   const user = await User.create({
     email,
@@ -71,7 +71,7 @@ const updateUser = async (
   if (payload.password) {
     payload.password = await generateHashedPassword(
       payload.password,
-      envVars.BCRYPT_SALT
+      envVars.BCRYPT_SALT_ROUND
     );
   }
   const user = await User.findByIdAndUpdate(userId, payload, {

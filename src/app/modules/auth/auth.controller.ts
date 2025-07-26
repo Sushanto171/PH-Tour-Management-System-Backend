@@ -5,6 +5,7 @@ import { sendResponse } from "../../utils/sendResponse";
 import { credentialService } from "./auth.service";
 
 const credentialLogin = catchAsync(async (req: Request, res: Response) => {
+
   const loginIfo = await credentialService.credentialLogin(req.body);
   sendResponse(res, {
     success: true,
