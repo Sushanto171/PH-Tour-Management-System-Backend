@@ -21,7 +21,7 @@ const createUser = async (payload: Partial<IUser>) => {
 
   const hashedPassword = await generateHashedPassword(
     password as string,
-    envVars.BCRYPT_SALT_ROUND
+    envVars.BCRYPT_SALT_ROUND_ROUND
   );
   const user = await User.create({
     email,
@@ -29,7 +29,10 @@ const createUser = async (payload: Partial<IUser>) => {
     auths: [authProvider],
     ...rest,
   });
-  return user;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { password: pass, ...response } = user.toObject();
+
+  return response;
 };
 
 const getUserByEmail = async (req: Request) => {
@@ -48,7 +51,7 @@ const updateUser = async (
   payload: Partial<IUser>,
   decodedToken: JwtPayload
 ) => {
-  const isUserExist = await User.findById(userId);
+  const isUserExist = await User.findOne({ email: payload.email });
   if (!isUserExist) {
     throw new AppError(httpStatus.BAD_REQUEST, "Invalid user id");
   }
@@ -71,7 +74,7 @@ const updateUser = async (
   if (payload.password) {
     payload.password = await generateHashedPassword(
       payload.password,
-      envVars.BCRYPT_SALT_ROUND
+      envVars.BCRYPT_SALT_ROUND_ROUND
     );
   }
   const user = await User.findByIdAndUpdate(userId, payload, {
