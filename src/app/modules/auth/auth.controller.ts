@@ -50,9 +50,6 @@ const logout = catchAsync(async (req, res) => {
     secure: false,
     sameSite: "lax",
   });
-  req.logout((err) => {
-    console.log("logout", err);
-  });
 
   sendResponse(res, {
     success: true,
@@ -89,7 +86,6 @@ const googleCallbackController = catchAsync(async (req, res) => {
   }
   const logInfo = createUserToken(user);
   setAuthCookie(res, logInfo);
-  console.log(user);
   res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
 });
 

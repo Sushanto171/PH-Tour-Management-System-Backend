@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { envVars } from "../config/env";
 import { IAuthsProvider, IUser, Role } from "../modules/user/user.interface";
 import { User } from "../modules/user/user.model";
@@ -14,7 +15,7 @@ export const createSuperAdmin = async () => {
 
     const hashedPassword = await generateHashedPassword(
       envVars.SUPER_ADMIN_PASSWORD,
-      envVars.BCRYPT_SALT_ROUND
+      envVars.BCRYPT_SALT_ROUND_ROUND
     );
 
     const authProvider: IAuthsProvider = {
