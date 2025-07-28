@@ -14,9 +14,9 @@ export const createSuperAdmin = async () => {
 
     const hashedPassword = await generateHashedPassword(
       envVars.SUPER_ADMIN_PASSWORD,
-      envVars.BCRYPT_SALT
+      envVars.BCRYPT_SALT_ROUND
     );
-    
+
     const authProvider: IAuthsProvider = {
       provider: "credential",
       providerId: envVars.SUPER_ADMIN_EMAIL,
