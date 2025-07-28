@@ -47,7 +47,6 @@ passport.use(
         }
         done(null, user);
       } catch (error) {
-        console.log("Google logging failed", error);
         return done(error);
       }
     }
@@ -57,7 +56,6 @@ passport.use(
 passport.serializeUser((user: Partial<IUser>, done) => done(null, user._id));
 
 passport.deserializeUser(async (id, done) => {
-  console.log("deserializeUserId", id);
   const user = await User.findById(id);
   done(null, user);
 });
