@@ -1,5 +1,6 @@
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
+import passport from "passport";
 import { envVars } from "../../config/env";
 import { AppError } from "../../errorHelpers/AppError";
 import { catchAsync } from "../../utils/catchAsync";
@@ -8,15 +9,27 @@ import { setAuthCookie } from "../../utils/setAuthCookie";
 import { createUserToken } from "../../utils/userToken";
 import { AuthService } from "./auth.service";
 
-const credentialLogin = catchAsync(async (req, res) => {
-  const loginIfo = await AuthService.credentialLogin(req.body);
-  setAuthCookie(res, loginIfo);
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    message: "User login successfully.",
-    data: loginIfo,
-  });
+const credentialLogin = catchAsync(async (req, res, next) => {
+  // const loginIfo = await AuthService.credentialLogin(req.body);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  passport.authenticate("local", async (err: any, user: any, info: any) => {
+    if (err) {
+      return next(new AppError(httpStatus.BAD_GATEWAY, info.message));
+    }
+    if (!user) {
+      return next(new AppError(httpStatus.BAD_GATEWAY, info.message));
+    }
+    const loginInfo = createUserToken(user);
+    setAuthCookie(res, loginInfo);
+
+    sendResponse(res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: "User login successfully.",
+      data: { ...loginInfo, user },
+    });
+  })(req, res, next);
 });
 
 const getNewAccessToken = catchAsync(async (req, res) => {
