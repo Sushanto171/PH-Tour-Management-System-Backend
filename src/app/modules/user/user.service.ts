@@ -10,10 +10,10 @@ import { User } from "./user.model";
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
-  const isUserExist = await User.findOne({ email });
-  if (isUserExist) {
-    throw new AppError(httpStatus.BAD_REQUEST, "This email already exist.");
-  }
+  // const isUserExist = await User.findOne({ email });
+  // if (isUserExist) {
+  //   throw new AppError(httpStatus.BAD_REQUEST, "This email already exist.");
+  // }
   const authProvider: IAuthsProvider = {
     provider: "credential",
     providerId: email as string,
@@ -51,9 +51,9 @@ const updateUser = async (
   payload: Partial<IUser>,
   decodedToken: JwtPayload
 ) => {
-  const isUserExist = await User.findOne({ email: payload.email });
+  const isUserExist = await User.findById(userId);
   if (!isUserExist) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Invalid user id");
+    throw new AppError(httpStatus.NOT_FOUND, "User does not find");
   }
 
   if (payload.role) {
@@ -77,6 +77,7 @@ const updateUser = async (
       envVars.BCRYPT_SALT_ROUND_ROUND
     );
   }
+
   const user = await User.findByIdAndUpdate(userId, payload, {
     new: true,
     runValidators: true,

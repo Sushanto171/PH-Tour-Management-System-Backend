@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import httpStatus from "http-status-codes";
+import { JwtPayload } from "jsonwebtoken";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { userService } from "./user.service";
-import { JwtPayload } from "jsonwebtoken";
 
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const result = await userService.getAllUsers();
@@ -41,7 +41,11 @@ const updateUser = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
   const payload = req.body;
   const decodedToken = req.user;
-  const user = await userService.updateUser(id, payload, decodedToken as JwtPayload);
+  const user = await userService.updateUser(
+    id,
+    payload,
+    decodedToken as JwtPayload
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
