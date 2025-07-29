@@ -1,17 +1,5 @@
-import { NextFunction, Request, Response } from "express";
-import z, { AnyZodObject } from "zod/v3";
+import z from "zod/v3";
 import { IsActive, Role } from "./user.interface";
-
-export const validateRequest =
-  (zodSchema: AnyZodObject) =>
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      req.body = await zodSchema.parseAsync(req.body);
-      next();
-    } catch (error) {
-      next(error);
-    }
-  };
 
 export const createUserZodSchema = z.object({
   name: z

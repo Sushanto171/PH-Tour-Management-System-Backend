@@ -1,12 +1,9 @@
 import { Router } from "express";
 import { checkAuth } from "../../middlewares/checkAuth";
+import { validateRequest } from "../../middlewares/validateZodSchema";
 import { userController } from "./user.controller";
 import { Role } from "./user.interface";
-import {
-  createUserZodSchema,
-  updateUserZodSchema,
-  validateRequest,
-} from "./user.validator";
+import { createUserZodSchema, updateUserZodSchema } from "./user.validator";
 
 const router = Router();
 
