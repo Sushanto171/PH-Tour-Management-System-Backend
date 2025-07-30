@@ -16,11 +16,11 @@ export const TourType = model<ITourType>("TourType", tourTypeSchema);
 const tourSchema = new Schema<ITour>(
   {
     title: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
+    slug: { type: String, required: true, unique: true, lowercase: true },
     description: { type: String },
     images: { type: [{ type: String }], default: [] },
     division: { type: Schema.Types.ObjectId, ref: "Division", required: true },
-    tourType: { type: Schema.Types.ObjectId, ref: "TourType" },
+    tourType: { type: Schema.Types.ObjectId, ref: "TourType", required: true },
     location: { type: String },
     startDate: { type: Date },
     endDate: { type: Date },

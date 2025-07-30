@@ -1,6 +1,7 @@
 import httpStatus from "http-status-codes";
 import { AppError } from "../../errorHelpers/AppError";
-import { ITourType } from "./tour.interface";
+import { checkDivisionTourTypeId } from "../../utils/checkDivisionTourTypeId";
+import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
 const createTourType = async (payload: Partial<ITourType>) => {
@@ -50,9 +51,56 @@ const deleteTourType = async (id: string) => {
   return null;
 };
 
+const createTour = async (payload: Partial<ITour>) => {
+  await checkDivisionTourTypeId(payload);
+
+  const isSlugExist = await Tour.findOne({ slug: payload.slug });
+  if (isSlugExist) {
+    throw new AppError(httpStatus.CONFLICT, "This Slug is already exit.");
+  }
+
+  const tour = await Tour.create(payload);
+  return tour;
+};
+
+const retrievedAllTour = async () => {
+  const tours = await Tour.find({}).populate(["division", "tourType"]);
+  const count = await Tour.countDocuments();
+  return {
+    tours,
+    count,
+  };
+};
+
+const updateTour = async (id: string, payload: Partial<ITour>) => {
+  const isTourExist = await Tour.findById(id);
+  if (!isTourExist) {
+    throw new AppError(httpStatus.NOT_FOUND, "Tour does not found.");
+  }
+  await checkDivisionTourTypeId(payload);
+  const updatedTour = await Tour.findByIdAndUpdate(id, payload, {
+    runValidators: true,
+    new: true,
+  });
+  return updatedTour;
+};
+
+const deleteTour = async (id: string) => {
+  const isExistTour = await Tour.findById(id);
+  if (!isExistTour) {
+    throw new AppError(httpStatus.NOT_FOUND, "Tour does not found");
+  }
+  await Tour.findByIdAndDelete(id);
+  return null;
+};
+
 export const tourService = {
   createTourType,
   retrieveAllTourTypes,
   updateTourType,
   deleteTourType,
+  createTour,
+  retrievedAllTour,
+  updateTour,
+  deleteTour,
 };
