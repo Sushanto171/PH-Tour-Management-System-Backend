@@ -39,12 +39,12 @@ const updateDivision = catchAsync(async (req, res) => {
 
 const deleteDivision = catchAsync(async (req, res) => {
   const id = req.params.id;
-  const result = await divisionService.deleteDivision(id);
+  await divisionService.deleteDivision(id);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     message: "Division deleted successfully.",
     success: true,
-    data: result,
+    data: null,
   });
 });
 

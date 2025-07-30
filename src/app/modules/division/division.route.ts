@@ -25,6 +25,7 @@ router.patch(
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   divisionController.updateDivision
 );
+
 router.delete(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),

@@ -19,7 +19,6 @@ export interface ITour {
   minAge?: number;
 }
 
-
-export interface TTourType{
-  name: string
+export interface ITourType {
+  name: string;
 }
