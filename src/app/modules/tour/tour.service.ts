@@ -1,9 +1,11 @@
 import httpStatus from "http-status-codes";
 import { AppError } from "../../errorHelpers/AppError";
 import { checkDivisionTourTypeId } from "../../utils/checkDivisionTourTypeId";
+import { Booking } from "../booking/booking.mode";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
+// tour type
 const createTourType = async (payload: Partial<ITourType>) => {
   const isTourTypeExist = await TourType.findOne({ name: payload.name });
   if (isTourTypeExist) {
@@ -27,6 +29,14 @@ const updateTourType = async (id: string, payload: Partial<ITourType>) => {
   if (!isTourTypeExist) {
     throw new AppError(httpStatus.NOT_FOUND, "Tour type does not found.");
   }
+  const isNameExist = await TourType.findOne({
+    name: payload.name,
+    _id: { $ne: id },
+  });
+
+  if (isNameExist) {
+    throw new AppError(httpStatus.CONFLICT, "Tour type name is already exist.");
+  }
   const updatedType = await TourType.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
@@ -40,8 +50,7 @@ const deleteTourType = async (id: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Tour type does not found.");
   }
   const isTypeLinkedWithTour = await Tour.find({ tourType: id });
-
-  if (isTypeLinkedWithTour.length < 0) {
+  if (isTypeLinkedWithTour.length > 0) {
     throw new AppError(
       httpStatus.METHOD_NOT_ALLOWED,
       "Can'nt delete it. This Tour type linked with tour"
@@ -51,13 +60,9 @@ const deleteTourType = async (id: string) => {
   return null;
 };
 
+// tour
 const createTour = async (payload: Partial<ITour>) => {
   await checkDivisionTourTypeId(payload);
-
-  const isSlugExist = await Tour.findOne({ slug: payload.slug });
-  if (isSlugExist) {
-    throw new AppError(httpStatus.CONFLICT, "This Slug is already exit.");
-  }
 
   const tour = await Tour.create(payload);
   return tour;
@@ -89,6 +94,15 @@ const deleteTour = async (id: string) => {
   const isExistTour = await Tour.findById(id);
   if (!isExistTour) {
     throw new AppError(httpStatus.NOT_FOUND, "Tour does not found");
+  }
+
+  // if tour relationship with booking or related entity so prevent deletion
+  const isRelationWithBooking = await Booking.findOne({ tour: id });
+  if (isRelationWithBooking) {
+    throw new AppError(
+      httpStatus.METHOD_NOT_ALLOWED,
+      "Can'nt delete it. This tour linked with booking"
+    );
   }
   await Tour.findByIdAndDelete(id);
   return null;

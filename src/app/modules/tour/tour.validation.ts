@@ -12,10 +12,12 @@ export const createTourZodSchema = z.object({
     invalid_type_error: "Title must be a string.",
     required_error: "Title must be required.",
   }),
-  slug: z.string({
-    invalid_type_error: "Slug must be a string.",
-    required_error: "Slug must be required.",
-  }),
+  slug: z
+    .string({
+      invalid_type_error: "Slug must be a string.",
+      required_error: "Slug must be required.",
+    })
+    .optional(),
   division: z.string({
     invalid_type_error: "Division must be a string.",
     required_error: "Division must be required.",

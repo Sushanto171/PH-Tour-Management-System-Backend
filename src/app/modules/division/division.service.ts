@@ -6,7 +6,7 @@ import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 
 const createDivision = async (payload: Partial<IDivision>) => {
-  await checkDivision(payload);
+  await checkDivision("", payload);
   const division = await Division.create(payload);
   return division;
 };
@@ -25,7 +25,7 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
   if (!isDivisionExist) {
     throw new AppError(httpStatus.NOT_FOUND, "Division does not found.");
   }
-  await checkDivision(payload);
+  await checkDivision(id, payload);
   const division = await Division.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
