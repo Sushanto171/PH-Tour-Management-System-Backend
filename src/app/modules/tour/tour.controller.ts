@@ -3,7 +3,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { tourService } from "./tour.service";
 
-// tour types
+/*----------------- tour types--------------*/
 const createTourType = catchAsync(async (req, res) => {
   const tourType = await tourService.createTourType(req.body);
   sendResponse(res, {
@@ -49,7 +49,7 @@ const deleteTourType = catchAsync(async (req, res) => {
   });
 });
 
-// tour
+/*-------------------------- tour ----------------------*/
 const createTour = catchAsync(async (req, res) => {
   const tour = await tourService.createTour(req.body);
   sendResponse(res, {
@@ -61,14 +61,17 @@ const createTour = catchAsync(async (req, res) => {
 });
 
 const retrieveAllTour = catchAsync(async (req, res) => {
-  const tour = await tourService.retrievedAllTour();
+  const query = req.query;
+  const tour = await tourService.retrievedAllTour(
+    query as Record<string, string>
+  );
 
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     message: "Tour retrieved successfully.",
     data: tour.tours,
-    meta: { total: tour.count },
+    meta: tour.meta,
   });
 });
 
@@ -93,6 +96,17 @@ const deleteTour = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleTOur = catchAsync(async (req, res) => {
+  const slug = req.params.slug;
+  const tour = await tourService.getSingleTour(slug);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Tour retrieved successfully.",
+    data: tour,
+  });
+});
+
 export const tourController = {
   createTourType,
   getAllTourTypes,
@@ -102,4 +116,5 @@ export const tourController = {
   retrieveAllTour,
   updateTour,
   deleteTour,
+  getSingleTOur
 };

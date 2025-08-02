@@ -17,6 +17,8 @@ export interface ITour {
   tourPlan?: string[];
   maxGuest?: number;
   minAge?: number;
+  departureLocation: string;
+  arrivalLocation: string;
 }
 
 export interface ITourType {

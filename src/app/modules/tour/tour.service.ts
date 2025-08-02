@@ -1,7 +1,9 @@
 import httpStatus from "http-status-codes";
 import { AppError } from "../../errorHelpers/AppError";
 import { checkDivisionTourTypeId } from "../../utils/checkDivisionTourTypeId";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { Booking } from "../booking/booking.mode";
+import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
@@ -68,12 +70,64 @@ const createTour = async (payload: Partial<ITour>) => {
   return tour;
 };
 
-const retrievedAllTour = async () => {
-  const tours = await Tour.find({}).populate(["division", "tourType"]);
-  const count = await Tour.countDocuments();
+const retrievedAllTour = async (query: Record<string, string>) => {
+  // const filter = query;
+  // const searchTerm = query.searchTerm || "";
+  // const sort = query.sort || "-createdAt";
+  // const fields = query.field?.split(",").join(" ") || "";
+  // const page = Number(query.page) || 1;
+  // const limit = Number(query.limit) || 10;
+  // const skip = (page - 1) * limit;
+
+  // const searchArray = searchableFields.map((field) => ({
+  //   [field]: { $regex: searchTerm, $options: "i" },
+  // }));
+  // const searchQuery = { $or: searchArray };
+
+  // for (const field of excludeField) {
+  //   // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+  //   delete filter[field];
+  // }
+
+  // const tours = await Tour.find(searchQuery)
+  //   .find(filter)
+  //   .sort(sort)
+  //   .select(fields)
+  //   .skip(skip)
+  //   .limit(limit);
+
+  // const tourFilter = Tour.find(filter);
+  // const toursSearch = tourFilter.find(searchQuery);
+  // const tours = await toursSearch
+  //   .sort(sort)
+  //   .select(fields)
+  //   .skip(skip)
+  //   .limit(limit);
+  // .populate(["division", "tourType"]);
+  // const count = await Tour.countDocuments();
+
+  // const meta = {
+  //   total: count,
+  //   page,
+  //   limit,
+  //   skip,
+  //   totalPage: Math.ceil(count / limit),
+  // };
+
+  const queryBuilder = new QueryBuilder(Tour.find(), query);
+  const tours = queryBuilder
+    .filter()
+    .search(tourSearchableFields)
+    .fields()
+    .sort()
+    .paginate();
+  // .build();
+  // const meta =await queryBuilder.getMeta();
+  const [data, meta] = await Promise.all([tours.build(), tours.getMeta()]);
+
   return {
-    tours,
-    count,
+    tours: data,
+    meta,
   };
 };
 
@@ -108,6 +162,14 @@ const deleteTour = async (id: string) => {
   return null;
 };
 
+const getSingleTour = async (slug: string) => {
+  if (!slug) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid slug.");
+  }
+  const tour = await Tour.findOne({ slug });
+  return tour;
+};
+
 export const tourService = {
   createTourType,
   retrieveAllTourTypes,
@@ -117,4 +179,5 @@ export const tourService = {
   retrievedAllTour,
   updateTour,
   deleteTour,
+  getSingleTour,
 };

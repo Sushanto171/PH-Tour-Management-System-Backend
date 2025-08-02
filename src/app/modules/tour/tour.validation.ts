@@ -63,6 +63,8 @@ export const createTourZodSchema = z.object({
   minAge: z
     .number({ invalid_type_error: "Minimum age must be a number." })
     .optional(),
+  departureLocation: z.string().optional(),
+  arrivalLocation: z.string().optional(),
 });
 
 export const updateTourZodSchema = z.object({
@@ -127,4 +129,6 @@ export const updateTourZodSchema = z.object({
   minAge: z
     .number({ invalid_type_error: "Minimum age must be a number." })
     .optional(),
+  departureLocation: z.string().optional(),
+  arrivalLocation: z.string().optional(),
 });

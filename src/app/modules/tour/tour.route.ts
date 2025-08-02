@@ -43,6 +43,7 @@ router.post(
 );
 
 router.get("/", tourController.retrieveAllTour);
+router.get("/:slug", tourController.getSingleTOur);
 
 router.patch(
   "/:id",
