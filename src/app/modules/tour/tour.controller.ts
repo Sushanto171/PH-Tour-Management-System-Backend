@@ -96,6 +96,17 @@ const deleteTour = catchAsync(async (req, res) => {
   });
 });
 
+const getSingleTOur = catchAsync(async (req, res) => {
+  const slug = req.params.slug;
+  const tour = await tourService.getSingleTour(slug);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Tour retrieved successfully.",
+    data: tour,
+  });
+});
+
 export const tourController = {
   createTourType,
   getAllTourTypes,
@@ -105,4 +116,5 @@ export const tourController = {
   retrieveAllTour,
   updateTour,
   deleteTour,
+  getSingleTOur
 };

@@ -31,6 +31,8 @@ const tourSchema = new Schema<ITour>(
     amenities: { type: [String], default: [] },
     maxGuest: { type: Number },
     minAge: { type: Number },
+    departureLocation: { type: String },
+    arrivalLocation: { type: String },
   },
   {
     timestamps: true,

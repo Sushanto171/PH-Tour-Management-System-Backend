@@ -2,6 +2,7 @@ import httpStatus from "http-status-codes";
 import { Types } from "mongoose";
 import { AppError } from "../../errorHelpers/AppError";
 import { checkDivision } from "../../utils/checkDivision";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 
@@ -11,12 +12,18 @@ const createDivision = async (payload: Partial<IDivision>) => {
   return division;
 };
 
-const retrieveAllDivision = async () => {
-  const divisions = await Division.find();
-  const count = await Division.countDocuments();
+const retrieveAllDivision = async (query: Record<string, string>) => {
+  // const divisions = await Division.find();
+  // const count = await Division.countDocuments();
+  const queryBuilder = new QueryBuilder(Division.find(), query);
+  const divisionBuilder = queryBuilder.filter().paginate();
+  const [divisions, meta] = await Promise.all([
+    divisionBuilder.build(),
+    divisionBuilder.getMeta(),
+  ]);
   return {
     divisions,
-    count,
+    meta,
   };
 };
 
@@ -42,9 +49,18 @@ const deleteDivision = async (id: string) => {
   return res;
 };
 
+const getSingleDivision = async (slug: string) => {
+  if (!slug) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Division slug is invalid.");
+  }
+  const division = await Division.findOne({slug});
+  return division;
+};
+
 export const divisionService = {
   createDivision,
   retrieveAllDivision,
   updateDivision,
   deleteDivision,
+  getSingleDivision,
 };

@@ -115,7 +115,7 @@ const retrievedAllTour = async (query: Record<string, string>) => {
   // };
 
   const queryBuilder = new QueryBuilder(Tour.find(), query);
-  const tours = await queryBuilder
+  const tours = queryBuilder
     .filter()
     .search(tourSearchableFields)
     .fields()
@@ -162,6 +162,14 @@ const deleteTour = async (id: string) => {
   return null;
 };
 
+const getSingleTour = async (slug: string) => {
+  if (!slug) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Invalid slug.");
+  }
+  const tour = await Tour.findOne({ slug });
+  return tour;
+};
+
 export const tourService = {
   createTourType,
   retrieveAllTourTypes,
@@ -171,4 +179,5 @@ export const tourService = {
   retrievedAllTour,
   updateTour,
   deleteTour,
+  getSingleTour,
 };

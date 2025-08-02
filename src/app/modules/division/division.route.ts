@@ -18,6 +18,7 @@ router.post(
 );
 
 router.get("/", divisionController.retrieveAllDivision);
+router.get("/:slug", divisionController.getSingleDivision);
 
 router.patch(
   "/:id",
