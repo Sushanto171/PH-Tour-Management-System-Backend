@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from "http-status-codes";
-import { startSession, Types } from "mongoose";
+import { Types } from "mongoose";
 import { AppError } from "../../errorHelpers/AppError";
 import { PAYMENT_STATUS } from "../payment/payment.interface";
 import { Payment } from "../payment/payment.model";
+import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
+import { sslCommerzService } from "../sslCommerz/sslCommerz.service";
 import { ITour } from "../tour/tour.interface";
 import { Tour } from "../tour/tour.model";
 import { IUser } from "../user/user.interface";
@@ -12,7 +15,7 @@ import { BOOKING_STATUS, IBooking } from "./booking.interface";
 import { Booking } from "./booking.mode";
 
 const getTransactionId = () => {
-  return `tran_${Date.now()}_${Math.floor(Math.random()* 1000) }`;
+  return `tran_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
 
 const createBooking = async (
@@ -22,7 +25,7 @@ const createBooking = async (
   // generate transaction id
   const transactionId = getTransactionId();
   // generate virtual sandbox
-  const session = await startSession();
+  const session = await Booking.startSession();
   try {
     session.startTransaction();
     // get current user
@@ -82,8 +85,29 @@ const createBooking = async (
       .populate("user", "name email address phone -_id")
       .populate("tour", "title description costFrom -_id")
       .populate("payment", "status amount -_id transactionId");
+
+    if (!updatedBooking) {
+      throw new AppError(
+        httpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to update booking."
+      );
+    }
+    const sslPayload: ISSLCommerz = {
+      name: (updatedBooking?.user as any).name,
+      email: (updatedBooking?.user as any).email,
+      address: (updatedBooking?.user as any).address,
+      phoneNumber: (updatedBooking?.user as any).phone,
+      amount,
+      transactionId,
+    };
+
+    const sslPayment = await sslCommerzService.sslPaymentInit(sslPayload);
+
     await session.commitTransaction();
-    return updatedBooking;
+    return {
+      paymentUrl: sslPayment.GatewayPageURL,
+      booking: updatedBooking,
+    };
   } catch (error) {
     await session.abortTransaction();
     throw error;
@@ -126,8 +150,8 @@ const getBookingById = async (bookingId: string) => {
   return booking;
 };
 
-const updateBookingStatus = async (bookingId: string) => {
-  return;
+const updateBookingStatus = async () => {
+  return {};
 };
 
 export const bookingService = {

@@ -17,6 +17,18 @@ interface RequiredEnv {
   GOOGLE_CALLBACK_URL: string;
   FRONTEND_URL: string;
   EXPRESS_SESSION: string;
+  SSL: {
+    SSL_STORE_ID: string;
+    SSL_STORE_PASS: string;
+    SSL_PAYMENT_API: string;
+    SSL_VALIDATION_API: string;
+    SSL_BACKEND_SUCCESS_URL: string;
+    SSL_BACKEND_CANCEL_URL: string;
+    SSL_BACKEND_FAIL_URL: string;
+    SSL_FRONTEND_SUCCESS_URL: string;
+    SSL_FRONTEND_CANCEL_URL: string;
+    SSL_FRONTEND_FAIL_URL: string;
+  };
 }
 
 const loadEnvVariables = (): RequiredEnv => {
@@ -36,6 +48,16 @@ const loadEnvVariables = (): RequiredEnv => {
     "GOOGLE_CALLBACK_URL",
     "FRONTEND_URL",
     "EXPRESS_SESSION",
+    "SSL_STORE_ID",
+    "SSL_STORE_PASS",
+    "SSL_PAYMENT_API",
+    "SSL_VALIDATION_API",
+    "SSL_BACKEND_SUCCESS_URL",
+    "SSL_BACKEND_CANCEL_URL",
+    "SSL_BACKEND_FAIL_URL",
+    "SSL_FRONTEND_SUCCESS_URL",
+    "SSL_FRONTEND_CANCEL_URL",
+    "SSL_FRONTEND_FAIL_URL",
   ];
   requiredEnvVariables.forEach((key) => {
     if (!process.env[key]) throw new Error(`Missing env variable: ${key}`);
@@ -57,6 +79,18 @@ const loadEnvVariables = (): RequiredEnv => {
     GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
     FRONTEND_URL: process.env.FRONTEND_URL as string,
     EXPRESS_SESSION: process.env.EXPRESS_SESSION as string,
+    SSL: {
+      SSL_STORE_ID: process.env.SSL_STORE_ID as string,
+      SSL_STORE_PASS: process.env.SSL_STORE_PASS as string,
+      SSL_PAYMENT_API: process.env.SSL_PAYMENT_API as string,
+      SSL_VALIDATION_API: process.env.SSL_VALIDATION_API as string,
+      SSL_BACKEND_SUCCESS_URL: process.env.SSL_BACKEND_SUCCESS_URL as string,
+      SSL_BACKEND_CANCEL_URL: process.env.SSL_BACKEND_CANCEL_URL as string,
+      SSL_BACKEND_FAIL_URL: process.env.SSL_BACKEND_FAIL_URL as string,
+      SSL_FRONTEND_SUCCESS_URL: process.env.SSL_FRONTEND_SUCCESS_URL as string,
+      SSL_FRONTEND_CANCEL_URL: process.env.SSL_FRONTEND_CANCEL_URL as string,
+      SSL_FRONTEND_FAIL_URL: process.env.SSL_FRONTEND_FAIL_URL as string,
+    },
   };
 };
 
