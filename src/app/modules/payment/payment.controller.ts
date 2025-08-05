@@ -1,6 +1,18 @@
 import { envVars } from "../../config/env";
 import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
 import { paymentService } from "./payment.service";
+
+const initPayment = catchAsync(async (req, res) => {
+  const bookingId = req.params.bookingId;
+  const response = await paymentService.initPayment(bookingId)
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "InitPayment",
+    data : response
+  })
+});
 
 const successPayment = catchAsync(async (req, res) => {
   const query = req.query;
@@ -19,7 +31,7 @@ const cancelPayment = catchAsync(async (req, res) => {
   const response = await paymentService.cancelPayment(
     query as Record<string, string>
   );
-  if (response.cancel) {
+  if (response.success) {
     res.redirect(
       `${envVars.SSL.SSL_FRONTEND_CANCEL_URL}?transactionId=${query.transactionId}&message=${response.message}&amount=${query.amount}&status=${query.status}`
     );
@@ -31,7 +43,7 @@ const failPayment = catchAsync(async (req, res) => {
   const response = await paymentService.failPayment(
     query as Record<string, string>
   );
-  if (response.fail) {
+  if (response.success) {
     res.redirect(
       `${envVars.SSL.SSL_FRONTEND_FAIL_URL}?transactionId=${query.transactionId}&message=${response.message}&amount=${query.amount}&status=${query.status}`
     );
@@ -39,6 +51,7 @@ const failPayment = catchAsync(async (req, res) => {
 });
 
 export const paymentController = {
+  initPayment,
   successPayment,
   cancelPayment,
   failPayment,

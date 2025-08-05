@@ -14,15 +14,16 @@ export const updateDBwithRollbackSessionSslCallback = async (
     // update payment status
     const updatedPayment = await Payment.findOneAndUpdate(
       { transactionId: query.transactionId },
-      { status: PAYMENT_STATUS.PAID },
-      { session }
+      { status: paymentStatus },
+      { session, runValidators: true }
     );
     // update booking status
     await Booking.findByIdAndUpdate(
       updatedPayment?.booking,
       { status: bookingStatus },
-      { session }
+      { session, runValidators: true }
     );
+    return;
   } catch (error) {
     return error;
   }
