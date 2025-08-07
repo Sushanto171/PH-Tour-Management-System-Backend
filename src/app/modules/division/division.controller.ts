@@ -1,10 +1,15 @@
 import httpStatus from "http-status-codes";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { IDivision } from "./division.interface";
 import { divisionService } from "./division.service";
 
 const createDivision = catchAsync(async (req, res) => {
-  const division = await divisionService.createDivision(req.body);
+  const payload: IDivision = {
+    ...req.body,
+    thumbnail: req.file?.path,
+  };
+  const division = await divisionService.createDivision(payload);
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     message: "Division created successfully",
