@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { multerUpload } from "../../config/multer.config";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { validateRequest } from "../../middlewares/validateZodSchema";
 import { Role } from "../user/user.interface";
@@ -37,6 +38,7 @@ router.delete(
 // tour
 router.post(
   "/create",
+  multerUpload.array("files"),
   validateRequest(createTourZodSchema),
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   tourController.createTour
