@@ -38,9 +38,9 @@ router.delete(
 // tour
 router.post(
   "/create",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   multerUpload.array("files"),
   validateRequest(createTourZodSchema),
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   tourController.createTour
 );
 
@@ -49,8 +49,9 @@ router.get("/:slug", tourController.getSingleTOur);
 
 router.patch(
   "/:id",
-  validateRequest(updateTourZodSchema),
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  multerUpload.array("files"),
+  validateRequest(updateTourZodSchema),
   tourController.updateTour
 );
 

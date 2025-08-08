@@ -1,5 +1,6 @@
 import httpStatus from "http-status-codes";
 import { Types } from "mongoose";
+import { deleteImageFromCloudinary } from "../../config/multer.config";
 import { AppError } from "../../errorHelpers/AppError";
 import { checkDivision } from "../../utils/checkDivision";
 import { QueryBuilder } from "../../utils/QueryBuilder";
@@ -46,6 +47,9 @@ const deleteDivision = async (id: string) => {
     throw new AppError(httpStatus.NOT_FOUND, "Division does not found.");
   }
   const res = await Division.findOneAndDelete({ _id: new Types.ObjectId(id) });
+  if (isDivisionExist.thumbnail) {
+    await deleteImageFromCloudinary(isDivisionExist.thumbnail);
+  }
   return res;
 };
 
@@ -53,7 +57,7 @@ const getSingleDivision = async (slug: string) => {
   if (!slug) {
     throw new AppError(httpStatus.BAD_REQUEST, "Division slug is invalid.");
   }
-  const division = await Division.findOne({slug});
+  const division = await Division.findOne({ slug });
   return division;
 };
 

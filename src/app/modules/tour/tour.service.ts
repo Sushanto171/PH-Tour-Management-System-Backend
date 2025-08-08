@@ -1,4 +1,5 @@
 import httpStatus from "http-status-codes";
+import { deleteImageFromCloudinary } from "../../config/multer.config";
 import { AppError } from "../../errorHelpers/AppError";
 import { checkDivisionTourTypeId } from "../../utils/checkDivisionTourTypeId";
 import { QueryBuilder } from "../../utils/QueryBuilder";
@@ -133,14 +134,51 @@ const retrievedAllTour = async (query: Record<string, string>) => {
 
 const updateTour = async (id: string, payload: Partial<ITour>) => {
   const isTourExist = await Tour.findById(id);
+  const newImages = [...(payload.images || [])];
   if (!isTourExist) {
     throw new AppError(httpStatus.NOT_FOUND, "Tour does not found.");
   }
+  if (
+    isTourExist?.images &&
+    isTourExist.images.length > 0 &&
+    payload.images &&
+    payload.images.length > 0
+  ) {
+    payload.images = [...isTourExist.images, ...payload.images];
+  }
+
+  if (payload.images && payload.images.length === 0) {
+    payload.images = [...(isTourExist.images ? isTourExist.images : [])];
+  }
+
+  if (
+    isTourExist.images &&
+    isTourExist.images.length > 0 &&
+    payload.deleteImages &&
+    payload.deleteImages.length > 0
+  ) {
+    const restImages = isTourExist.images.filter(
+      (url) => !payload.deleteImages?.includes(url)
+    );
+    payload.images = [...restImages, ...newImages];
+  }
+  // console.log("arrayDelete", payload.deleteImages);
   await checkDivisionTourTypeId(payload);
   const updatedTour = await Tour.findByIdAndUpdate(id, payload, {
     runValidators: true,
     new: true,
   });
+
+  if (
+    payload.deleteImages &&
+    payload.deleteImages.length &&
+    isTourExist.images &&
+    isTourExist.images.length
+  ) {
+    await Promise.all(
+      payload.deleteImages.map((url) => deleteImageFromCloudinary(url))
+    );
+  }
   return updatedTour;
 };
 

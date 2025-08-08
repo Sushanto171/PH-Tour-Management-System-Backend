@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { multerUpload } from "../../config/multer.config";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { validateRequest } from "../../middlewares/validateZodSchema";
 import { userController } from "./user.controller";
@@ -9,12 +10,12 @@ const router = Router();
 
 router.post(
   "/register",
+  multerUpload.single("file"),
   validateRequest(createUserZodSchema),
   userController.createUser
 );
 router.get(
   "/me/:email",
-
   userController.getUserByEmail
 );
 router.get(
@@ -25,6 +26,7 @@ router.get(
 router.patch(
   "/:id",
   checkAuth(...Object.values(Role)),
+  multerUpload.single("file"),
   validateRequest(updateUserZodSchema),
   userController.updateUser
 );

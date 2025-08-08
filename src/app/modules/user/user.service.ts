@@ -2,6 +2,7 @@ import { Request } from "express";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
+import { deleteImageFromCloudinary } from "../../config/multer.config";
 import { AppError } from "../../errorHelpers/AppError";
 import { generateHashedPassword } from "../../utils/bcrypt";
 import { IAuthsProvider, IUser, Role } from "./user.interface";
@@ -82,6 +83,10 @@ const updateUser = async (
     new: true,
     runValidators: true,
   }).select("-password");
+
+  if (payload.picture && isUserExist.picture) {
+    await deleteImageFromCloudinary(isUserExist.picture);
+  }
   return user;
 };
 

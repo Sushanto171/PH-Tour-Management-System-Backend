@@ -56,6 +56,7 @@ const createTour = catchAsync(async (req, res) => {
     ...req.body,
     images: (req.files as Express.Multer.File[]).map((file) => file.path),
   };
+  // throw new AppError(httpStatus.BAD_REQUEST, "Fake Error");
   const tour = await tourService.createTour(payload);
   sendResponse(res, {
     success: true,
@@ -82,7 +83,12 @@ const retrieveAllTour = catchAsync(async (req, res) => {
 
 const updateTour = catchAsync(async (req, res) => {
   const id = req.params.id;
-  const updatedTour = await tourService.updateTour(id, req.body);
+
+  const payload: ITour = {
+    ...req.body,
+    images: (req.files as Express.Multer.File[]).map((file) => file.path),
+  };
+  const updatedTour = await tourService.updateTour(id, payload);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,

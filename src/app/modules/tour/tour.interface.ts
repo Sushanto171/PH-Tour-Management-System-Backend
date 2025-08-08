@@ -19,6 +19,7 @@ export interface ITour {
   minAge?: number;
   departureLocation: string;
   arrivalLocation: string;
+  deleteImages?: string[];
 }
 
 export interface ITourType {
