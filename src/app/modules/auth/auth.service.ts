@@ -8,7 +8,7 @@ import {
   createUserToken,
   getNewAccessTokenWithRefreshToken,
 } from "../../utils/userToken";
-import { IUser } from "../user/user.interface";
+import { IAuthsProvider, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 
 const credentialLogin = async (payload: Partial<IUser>) => {
@@ -39,8 +39,6 @@ const credentialLogin = async (payload: Partial<IUser>) => {
 
 const getNewAccessToken = async (refreshToken: string) => {
   const newAccessToken = await getNewAccessTokenWithRefreshToken(refreshToken);
-  
-
   return {
     accessToken: newAccessToken,
   };
@@ -72,8 +70,65 @@ const resetPassword = async (
   return true;
 };
 
+const changePassword = async (
+  payload: JwtPayload,
+  oldPassword: string,
+  newPassword: string
+) => {
+  const user = await User.findById(payload.userId);
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not matched.");
+  }
+  const isPasswordMatched = await bcrypt.compare(
+    oldPassword,
+    user.password as string
+  );
+  if (!isPasswordMatched) {
+    throw new AppError(httpStatus.BAD_REQUEST, "oldPassword does not matched.");
+  }
+
+  user.password = await generateHashedPassword(
+    newPassword,
+    envVars.BCRYPT_SALT_ROUND_ROUND
+  );
+  user.save();
+
+  return true;
+};
+
+const setPassword = async (userId: string, plainPassword: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User does not matched.");
+  }
+
+  if (
+    user.password &&
+    user.auths.some((authProvider) => authProvider.provider === "google")
+  ) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Password already set. You can change password to your profile."
+    );
+  }
+  const hashedPassword = await generateHashedPassword(
+    plainPassword,
+    envVars.BCRYPT_SALT_ROUND_ROUND
+  );
+  const authUser: IAuthsProvider = {
+    provider: "credential",
+    providerId: user.email,
+  };
+  user.password = hashedPassword;
+  user.auths = [...user.auths, authUser];
+  await user.save();
+  return true;
+};
+
 export const AuthService = {
   credentialLogin,
   getNewAccessToken,
+  changePassword,
+  setPassword,
   resetPassword,
 };
