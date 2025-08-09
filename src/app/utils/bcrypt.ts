@@ -1,9 +1,9 @@
 import bcrypt from "bcryptjs";
 
 export const generateHashedPassword = async (
-  password: string,
+  plainPassword: string,
   saltRound: string | number
 ) => {
-  const hashedPassword = await bcrypt.hash(password, Number(saltRound));
+  const hashedPassword = await bcrypt.hash(plainPassword, Number(saltRound));
   return hashedPassword;
 };

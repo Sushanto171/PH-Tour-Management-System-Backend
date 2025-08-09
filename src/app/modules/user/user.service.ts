@@ -1,4 +1,3 @@
-import { Request } from "express";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
@@ -36,15 +35,12 @@ const createUser = async (payload: Partial<IUser>) => {
   return response;
 };
 
-const getUserByEmail = async (req: Request) => {
-  const email = req.params.email;
-  const user = await User.findOne({ email }).select("-password");
+const getMe = async (userId: string) => {
+  const user = await User.findById(userId).select("-password");
   if (!user) {
-    throw new AppError(httpStatus.BAD_REQUEST, "Email does not exist");
+    throw new AppError(httpStatus.BAD_REQUEST, "User id does not exist");
   }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { password, ...rest } = user.toObject();
-  return rest;
+  return user;
 };
 
 const updateUser = async (
@@ -103,7 +99,7 @@ const getAllUsers = async () => {
 
 export const userService = {
   createUser,
-  getUserByEmail,
+  getMe,
   updateUser,
   getAllUsers,
 };

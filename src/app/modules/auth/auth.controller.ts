@@ -15,14 +15,14 @@ const credentialLogin = catchAsync(async (req, res, next) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   passport.authenticate("local", async (err: any, user: any, info: any) => {
     if (err) {
-      return next(new AppError(httpStatus.BAD_GATEWAY, info.message));
+      // throw new AppError(err.statusCode || 401, info.message);
+      return next(new AppError(err.statusCode || 401, err));
     }
     if (!user) {
-      return next(new AppError(httpStatus.BAD_GATEWAY, info.message));
+      return next(new AppError(err.statusCode || 401, info.message));
     }
     const loginInfo = createUserToken(user);
     setAuthCookie(res, loginInfo);
-
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -72,10 +72,10 @@ const logout = catchAsync(async (req, res) => {
   });
 });
 
-const resetPassword = catchAsync(async (req, res) => {
+const changePassword = catchAsync(async (req, res) => {
   const decoded = req.user;
   const { newPassword, oldPassword } = req.body;
-  const newUpdatedPassword = await AuthService.resetPassword(
+  const newUpdatedPassword = await AuthService.changePassword(
     decoded as JwtPayload,
     oldPassword,
     newPassword
@@ -85,6 +85,47 @@ const resetPassword = catchAsync(async (req, res) => {
     statusCode: httpStatus.OK,
     data: newUpdatedPassword,
     message: "Password changed successfully",
+  });
+});
+
+const setPassword = catchAsync(async (req, res) => {
+  const decoded = req.user as JwtPayload;
+  const { password } = req.body;
+  const newUpdatedPassword = await AuthService.setPassword(
+    decoded.userId,
+    password
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: newUpdatedPassword,
+    message: "Password set successfully",
+  });
+});
+
+const forgotPassword = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  await AuthService.forgotPassword(email);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: null,
+    message: "Email send successfully",
+  });
+});
+
+const resetPassword = catchAsync(async (req, res) => {
+  const decoded = req.user as JwtPayload;
+  const { password } = req.body;
+  const newUpdatedPassword = await AuthService.resetPassword(
+    decoded.userId,
+    password
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: newUpdatedPassword,
+    message: "Password reset successfully",
   });
 });
 
@@ -107,5 +148,8 @@ export const AuthControllers = {
   getNewAccessToken,
   logout,
   resetPassword,
+  changePassword,
+  setPassword,
+  forgotPassword,
   googleCallbackController,
 };
