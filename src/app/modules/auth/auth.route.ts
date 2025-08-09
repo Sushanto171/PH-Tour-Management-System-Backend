@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from "express";
 import passport from "passport";
+import { envVars } from "../../config/env";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import { AuthControllers } from "./auth.controller";
@@ -37,7 +38,9 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/" }),
+  passport.authenticate("google", {
+    failureRedirect: `${envVars.FRONTEND_URL}/login?message=There are some issues with your account. Please contact our support team.`,
+  }),
   AuthControllers.googleCallbackController
 );
 

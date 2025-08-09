@@ -22,6 +22,22 @@ passport.use(
         if (!isUserExist) {
           return done(null, false, { message: "User dose not exist." });
         }
+
+        if (!isUserExist.isVerified) {
+          // throw new AppError(httpStatus.BAD_REQUEST, "User is not verified.");
+          return done("User is not verified.");
+        }
+        if (isUserExist.isDeleted) {
+          // throw new AppError(httpStatus.BAD_REQUEST, "User is Deleted.");
+          return done("User is Deleted.");
+        }
+        if (
+          (isUserExist.isActive && isUserExist.isActive === IsActive.BLOCKED) ||
+          isUserExist.isActive === IsActive.INACTIVE
+        ) {
+          // throw new AppError(httpStatus.BAD_REQUEST, "User is Blocked.");
+          return done(`User is ${isUserExist.isActive}`);
+        }
         if (
           isUserExist.auths.some(
             (provider) =>
@@ -71,6 +87,23 @@ passport.use(
         }
 
         let user = await User.findOne({ email });
+
+        if (user) {
+          if (!user.isVerified) {
+            // throw new AppError(httpStatus.BAD_REQUEST, "User is not verified.");
+            return done(null, false, { message: "User is not verified." });
+          }
+          if (user.isDeleted) {
+            // throw new AppError(httpStatus.BAD_REQUEST, "User is Deleted.");
+            return done(null, false, { message: "User is Deleted." });
+          }
+          if (
+            (user.isActive && user.isActive === IsActive.BLOCKED) ||
+            user.isActive === IsActive.INACTIVE
+          ) {
+            return done(null, false, { message: `User is ${user.isActive}` });
+          }
+        }
         if (!user) {
           user = await User.create({
             name: profile.displayName,

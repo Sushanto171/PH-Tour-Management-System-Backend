@@ -15,14 +15,14 @@ const credentialLogin = catchAsync(async (req, res, next) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   passport.authenticate("local", async (err: any, user: any, info: any) => {
     if (err) {
-      return next(new AppError(httpStatus.BAD_GATEWAY, info.message));
+      // throw new AppError(err.statusCode || 401, info.message);
+      return next(new AppError(err.statusCode || 401, err));
     }
     if (!user) {
-      return next(new AppError(httpStatus.BAD_GATEWAY, info.message));
+      return next(new AppError(err.statusCode || 401, info.message));
     }
     const loginInfo = createUserToken(user);
     setAuthCookie(res, loginInfo);
-
     sendResponse(res, {
       success: true,
       statusCode: httpStatus.OK,
