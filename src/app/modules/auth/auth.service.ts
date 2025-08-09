@@ -4,11 +4,13 @@ import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
 import { AppError } from "../../errorHelpers/AppError";
 import { generateHashedPassword } from "../../utils/bcrypt";
+import { generateJwtToken } from "../../utils/jwt";
+import { sendEmail } from "../../utils/sendEmail";
 import {
   createUserToken,
   getNewAccessTokenWithRefreshToken,
 } from "../../utils/userToken";
-import { IAuthsProvider, IUser } from "../user/user.interface";
+import { IAuthsProvider, IsActive, IUser } from "../user/user.interface";
 import { User } from "../user/user.model";
 
 const credentialLogin = async (payload: Partial<IUser>) => {
@@ -125,10 +127,56 @@ const setPassword = async (userId: string, plainPassword: string) => {
   return true;
 };
 
+const forgotPassword = async (email: string) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, "User does not matched.");
+  }
+  if (user) {
+    if (!user.isVerified) {
+      throw new AppError(httpStatus.BAD_REQUEST, "User is not verified.");
+    }
+    if (user.isDeleted) {
+      throw new AppError(httpStatus.BAD_REQUEST, "User is Deleted.");
+    }
+    if (
+      (user.isActive && user.isActive === IsActive.BLOCKED) ||
+      user.isActive === IsActive.INACTIVE
+    ) {
+      throw new AppError(httpStatus.BAD_REQUEST, `User is ${user.isActive}`);
+    }
+  }
+
+  const jwtPayload = {
+    userId: user._id,
+    email: user.email,
+    role: user.role,
+  };
+
+  const resetToken = generateJwtToken(
+    jwtPayload,
+    envVars.JWT_ACCESS_SECRET,
+    "10min"
+  );
+
+  const resetUILink = `${envVars.FRONTEND_URL}/reset-password?id=${user._id}&resetToken=${resetToken}`;
+  await sendEmail({
+    to: user.email,
+    subject: "Reset Password",
+    templateName: "forgotPassword",
+    templateData: {
+      name: user.name,
+      resetUILink,
+    },
+  });
+  return null;
+};
+
 export const AuthService = {
   credentialLogin,
   getNewAccessToken,
   changePassword,
   setPassword,
+  forgotPassword,
   resetPassword,
 };
