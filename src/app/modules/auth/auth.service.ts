@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import bcrypt from "bcryptjs";
 import httpStatus from "http-status-codes";
 import { JwtPayload } from "jsonwebtoken";
@@ -146,13 +147,17 @@ const forgotPassword = async (email: string) => {
   return null;
 };
 
-const resetPassword = async (userId: string, newPassword: string) => {
+const resetPassword = async (userId: string, payload: Record<string, any>) => {
+  if (userId !== payload._id) {
+    console.log(userId, payload._id);
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not matched.");
+  }
   const user = await User.findById(userId);
   if (!user) {
     throw new AppError(httpStatus.BAD_REQUEST, "User does not matched.");
   }
   user.password = await generateHashedPassword(
-    newPassword,
+    payload.password,
     envVars.BCRYPT_SALT_ROUND_ROUND
   );
   user.save();
