@@ -46,32 +46,6 @@ const getNewAccessToken = async (refreshToken: string) => {
   };
 };
 
-const resetPassword = async (
-  payload: JwtPayload,
-  oldPassword: string,
-  newPassword: string
-) => {
-  const user = await User.findById(payload.userId);
-  if (!user) {
-    throw new AppError(httpStatus.BAD_REQUEST, "User does not matched.");
-  }
-  const isPasswordMatched = await bcrypt.compare(
-    oldPassword,
-    user.password as string
-  );
-  if (!isPasswordMatched) {
-    throw new AppError(httpStatus.BAD_REQUEST, "oldPassword does not matched.");
-  }
-
-  user.password = await generateHashedPassword(
-    newPassword,
-    envVars.BCRYPT_SALT_ROUND_ROUND
-  );
-  user.save();
-
-  return true;
-};
-
 const changePassword = async (
   payload: JwtPayload,
   oldPassword: string,
@@ -170,6 +144,20 @@ const forgotPassword = async (email: string) => {
     },
   });
   return null;
+};
+
+const resetPassword = async (userId: string, newPassword: string) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AppError(httpStatus.BAD_REQUEST, "User does not matched.");
+  }
+  user.password = await generateHashedPassword(
+    newPassword,
+    envVars.BCRYPT_SALT_ROUND_ROUND
+  );
+  user.save();
+
+  return true;
 };
 
 export const AuthService = {

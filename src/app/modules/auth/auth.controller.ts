@@ -72,22 +72,6 @@ const logout = catchAsync(async (req, res) => {
   });
 });
 
-const resetPassword = catchAsync(async (req, res) => {
-  const decoded = req.user;
-  const { newPassword, oldPassword } = req.body;
-  const newUpdatedPassword = await AuthService.resetPassword(
-    decoded as JwtPayload,
-    oldPassword,
-    newPassword
-  );
-  sendResponse(res, {
-    success: true,
-    statusCode: httpStatus.OK,
-    data: newUpdatedPassword,
-    message: "Password changed successfully",
-  });
-});
-
 const changePassword = catchAsync(async (req, res) => {
   const decoded = req.user;
   const { newPassword, oldPassword } = req.body;
@@ -121,12 +105,27 @@ const setPassword = catchAsync(async (req, res) => {
 
 const forgotPassword = catchAsync(async (req, res) => {
   const { email } = req.body;
-   await AuthService.forgotPassword(email);
+  await AuthService.forgotPassword(email);
   sendResponse(res, {
     success: true,
     statusCode: httpStatus.OK,
     data: null,
     message: "Email send successfully",
+  });
+});
+
+const resetPassword = catchAsync(async (req, res) => {
+  const decoded = req.user as JwtPayload;
+  const { password } = req.body;
+  const newUpdatedPassword = await AuthService.resetPassword(
+    decoded.userId,
+    password
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    data: newUpdatedPassword,
+    message: "Password reset successfully",
   });
 });
 

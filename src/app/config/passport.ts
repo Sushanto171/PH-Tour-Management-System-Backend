@@ -49,12 +49,13 @@ passport.use(
               "This email is already linked with a Google account. Please log in using Google or set a password to use email and password login.",
           });
         }
+
         const isMatch = await bcrypt.compare(
           password,
           isUserExist.password as string
         );
         if (!isMatch) {
-          return done(null, false, { message: "Password does not match." });
+          return done("Password does not match.");
         }
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { password: pass, ...rest } = isUserExist.toObject();
