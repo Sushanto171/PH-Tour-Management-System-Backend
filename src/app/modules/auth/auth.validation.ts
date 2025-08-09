@@ -1,6 +1,7 @@
 import z from "zod/v3";
 
 export const updatePasswordZodSchema = z.object({
+  _id: z.string().optional(),
   password: z
     .string({ invalid_type_error: "Password must be string format." })
     .min(8, { message: "Password must be at least 8 characters long." })
