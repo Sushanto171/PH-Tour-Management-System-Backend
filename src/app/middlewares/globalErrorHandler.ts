@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextFunction, Request, Response } from "express";
 import { envVars } from "../config/env";
+import { deleteImageFromCloudinary } from "../config/multer.config";
 import { handlerCastError } from "../helpers/handlerCastError";
 import { handlerDuplicateError } from "../helpers/handlerDuplicateError";
 import { handlerValidationError } from "../helpers/handlerValidationError";
@@ -9,7 +10,8 @@ import { handlerZodError } from "../helpers/handlerZodError";
 import { TErrorSource } from "../interfaces/ErrorTypes";
 import { AppError } from "./../errorHelpers/AppError";
 
-export const globalErrorHandler = (
+
+export const globalErrorHandler = async (
   err: any,
   req: Request,
   res: Response,
@@ -17,6 +19,14 @@ export const globalErrorHandler = (
 ) => {
   if (envVars.NODE_ENV === "development") {
     console.log("GlobalError", err);
+  }
+
+  if (req.file) {
+    await deleteImageFromCloudinary(req.file.path);
+  }
+  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+    const imageUrls = req.files.map((file) => file.path);
+    await Promise.all(imageUrls.map((url) => deleteImageFromCloudinary(url)));
   }
   let statusCode = 500;
   let message = `Something went wrong !!`;

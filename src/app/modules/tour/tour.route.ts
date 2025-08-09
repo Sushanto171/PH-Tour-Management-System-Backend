@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { multerUpload } from "../../config/multer.config";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { validateRequest } from "../../middlewares/validateZodSchema";
 import { Role } from "../user/user.interface";
@@ -37,8 +38,9 @@ router.delete(
 // tour
 router.post(
   "/create",
-  validateRequest(createTourZodSchema),
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  multerUpload.array("files"),
+  validateRequest(createTourZodSchema),
   tourController.createTour
 );
 
@@ -47,8 +49,9 @@ router.get("/:slug", tourController.getSingleTOur);
 
 router.patch(
   "/:id",
-  validateRequest(updateTourZodSchema),
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  multerUpload.array("files"),
+  validateRequest(updateTourZodSchema),
   tourController.updateTour
 );
 

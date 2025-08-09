@@ -13,9 +13,9 @@ const router = Router();
 
 router.post(
   "/create",
+  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   multerUpload.single("file"),
   validateRequest(createDivisionZodSchema),
-  checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   divisionController.createDivision
 );
 
