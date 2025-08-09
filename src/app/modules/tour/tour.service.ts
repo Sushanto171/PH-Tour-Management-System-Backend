@@ -134,7 +134,7 @@ const retrievedAllTour = async (query: Record<string, string>) => {
 
 const updateTour = async (id: string, payload: Partial<ITour>) => {
   const isTourExist = await Tour.findById(id);
-  const newImages = [...(payload.images || [])];
+  // const newImages = [...(payload.images || [])];
   if (!isTourExist) {
     throw new AppError(httpStatus.NOT_FOUND, "Tour does not found.");
   }
@@ -160,7 +160,10 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
     const restImages = isTourExist.images.filter(
       (url) => !payload.deleteImages?.includes(url)
     );
-    payload.images = [...restImages, ...newImages];
+    const updatePayloadImages = (payload.images || [])
+      .filter((url) => !payload.deleteImages?.includes(url))
+      .filter((url) => !restImages.includes(url));
+    payload.images = [...restImages, ...updatePayloadImages];
   }
   // console.log("arrayDelete", payload.deleteImages);
   await checkDivisionTourTypeId(payload);
