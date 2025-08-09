@@ -14,10 +14,7 @@ router.post(
   validateRequest(createUserZodSchema),
   userController.createUser
 );
-router.get(
-  "/me/:email",
-  userController.getUserByEmail
-);
+router.get("/me", checkAuth(...Object.values(Role)), userController.getMe);
 router.get(
   "/all-users",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
