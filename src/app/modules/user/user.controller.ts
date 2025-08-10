@@ -29,6 +29,17 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getUserById = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+  const user = await userService.getUserById(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "User retrieved successfully",
+    data: user,
+  });
+});
+
 const createUser = catchAsync(async (req: Request, res: Response) => {
   const payload: IUser = {
     ...req.body,
@@ -65,4 +76,5 @@ export const userController = {
   getMe,
   updateUser,
   getAllUsers,
+  getUserById,
 };

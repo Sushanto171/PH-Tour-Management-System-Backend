@@ -41,6 +41,15 @@ interface RequiredEnv {
     SMTP_PASS: string;
     SMTP_FROM: string;
   };
+  REDIS: {
+    REDIS_PASS: string;
+    REDIS_HOST: string;
+    REDIS_PORT: string;
+  };
+  TWILIO: {
+    TWILIO_ACCOUNT_SIID: string;
+    TWILIO_AUTH_TOKEN: string;
+  };
 }
 
 const loadEnvVariables = (): RequiredEnv => {
@@ -78,6 +87,11 @@ const loadEnvVariables = (): RequiredEnv => {
     "SMTP_USER",
     "SMTP_PASS",
     "SMTP_FROM",
+    "REDIS_PASS",
+    "REDIS_HOST",
+    "REDIS_PORT",
+    "TWILIO_ACCOUNT_SIID",
+    "TWILIO_AUTH_TOKEN",
   ];
   requiredEnvVariables.forEach((key) => {
     if (!process.env[key]) throw new Error(`Missing env variable: ${key}`);
@@ -122,6 +136,15 @@ const loadEnvVariables = (): RequiredEnv => {
       SMTP_USER: process.env.SMTP_USER as string,
       SMTP_PASS: process.env.SMTP_PASS as string,
       SMTP_FROM: process.env.SMTP_FROM as string,
+    },
+    REDIS: {
+      REDIS_PASS: process.env.REDIS_PASS as string,
+      REDIS_HOST: process.env.REDIS_HOST as string,
+      REDIS_PORT: process.env.REDIS_PORT as string,
+    },
+    TWILIO: {
+      TWILIO_ACCOUNT_SIID: process.env.TWILIO_ACCOUNT_SIID as string,
+      TWILIO_AUTH_TOKEN: process.env.TWILIO_AUTH_TOKEN as string,
     },
   };
 };

@@ -18,12 +18,14 @@ export const updateDBwithRollbackSessionSslCallback = async (
       { session, runValidators: true }
     );
     // update booking status
-    await Booking.findByIdAndUpdate(
+    const updatedBooking = await Booking.findByIdAndUpdate(
       updatedPayment?.booking,
       { status: bookingStatus },
-      { session, runValidators: true }
-    );
-    return;
+      { session, runValidators: true, new: true }
+    )
+      .populate("user", ["name", "email", "address"])
+      .populate("tour", ["title", "costFrom", "description"]);
+    return updatedBooking;
   } catch (error) {
     return error;
   }

@@ -3,6 +3,7 @@ import { Server } from "http";
 import mongoose from "mongoose";
 import app from "./app";
 import { envVars } from "./app/config/env";
+import { connectRedis } from "./app/config/redis.config";
 import { createSuperAdmin } from "./app/utils/seedSuperAdmin";
 
 let server: Server;
@@ -20,6 +21,7 @@ const serverStart = async () => {
 };
 
 (async () => {
+  await connectRedis();
   await serverStart();
   await createSuperAdmin();
 })();

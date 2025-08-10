@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OTP Email</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f6f6f6;
+        padding: 20px;
+      }
+      .email-container {
+        background-color: #ffffff;
+        max-width: 500px;
+        margin: auto;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        background-color: #4f46e5;
+        color: #ffffff;
+        padding: 15px;
+        text-align: center;
+        font-size: 20px;
+      }
+      .content {
+        padding: 20px;
+        text-align: center;
+      }
+      .otp {
+        display: inline-block;
+        background-color: #f1f1f1;
+        padding: 10px 20px;
+        font-size: 24px;
+        letter-spacing: 3px;
+        border-radius: 6px;
+        font-weight: bold;
+        margin: 15px 0;
+      }
+      .footer {
+        padding: 15px;
+        text-align: center;
+        font-size: 14px;
+        color: #888;
+        border-top: 1px solid #eee;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email-container">
+      <div class="header">Your OTP Code</div>
+      <div class="content">
+        <p>Hi <strong><%= name %></strong>,</p>
+        <p>Here is your OTP code:</p>
+        <div class="otp"><%= otp %></div>
+      </div>
+      <div class="footer">This OTP is valid for 2 minutes.</div>
+    </div>
+  </body>
+</html>
