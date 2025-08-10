@@ -176,9 +176,26 @@ const failPayment = transactionRollbackCatchAsync(
 //   }
 // };
 
+const getInvoiceUrl = async (userId: string, paymentId: string) => {
+  const payment = await Payment.findById(paymentId).populate("booking", [
+    "user",
+  ]);
+  if (!payment) {
+    throw new AppError(httpStatus.NOT_FOUND, "Payment does not found");
+  }
+  if (userId !== (payment.booking as unknown as IBooking).user.toHexString()) {
+    throw new AppError(
+      httpStatus.UNAUTHORIZED,
+      "Your are not permitted to show another invoice."
+    );
+  }
+  return payment.invoiceUrl;
+};
+
 export const paymentService = {
   successPayment,
   cancelPayment,
   failPayment,
   initPayment,
+  getInvoiceUrl,
 };
