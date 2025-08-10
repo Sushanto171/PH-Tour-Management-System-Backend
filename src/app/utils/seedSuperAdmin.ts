@@ -10,6 +10,7 @@ export const createSuperAdmin = async () => {
       email: envVars.SUPER_ADMIN_EMAIL,
     });
     if (isSuperAdminExist) {
+      console.log("🙎‍♂️ Super Admin already exist.");
       return;
     }
 
