@@ -15,4 +15,5 @@ export interface IBooking {
   phone?: string;
   address?: string;
   status?: BOOKING_STATUS;
+  createdAt?: Date
 }

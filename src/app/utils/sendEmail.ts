@@ -8,8 +8,8 @@ export interface ISendEmailOptions {
   to: string;
   subject: string;
   text?: string;
-  templateName?: string;
-  templateData?: Record<string, any>;
+  templateName: string;
+  templateData: Record<string, any>;
   attachments?: {
     filename: string;
     content: Buffer | string;

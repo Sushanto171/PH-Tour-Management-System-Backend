@@ -43,10 +43,23 @@ const sendOtp = async (email: string) => {
 };
 
 const verifyOtp = async (otp: string, email: string) => {
-  const redisOtp = await redisClient.get(`otp:${email}`);
+  const redisKey = `otp:${email}`;
+  const redisOtp = await redisClient.get(redisKey);
+  if (!redisOtp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Your OTP is Expired.");
+  }
   if (redisOtp !== otp) {
     throw new AppError(httpStatus.BAD_REQUEST, "Your OTP is invalid.");
   }
+  await Promise.all([
+    User.findOneAndUpdate(
+      { email },
+      { isVerified: true },
+      { runValidators: true }
+    ),
+    redisClient.del(redisKey),
+  ]);
+
   return {};
 };
 
