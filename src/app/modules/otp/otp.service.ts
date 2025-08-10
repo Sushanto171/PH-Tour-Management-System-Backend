@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import httpStatus from "http-status-codes";
 import { redisClient } from "../../config/redis.config";
 import { AppError } from "../../errorHelpers/AppError";
 import { sendEmail } from "../../utils/sendEmail";
@@ -41,7 +42,11 @@ const sendOtp = async (email: string) => {
   return {};
 };
 
-const verifyOtp = async () => {
+const verifyOtp = async (otp: string, email: string) => {
+  const redisOtp = await redisClient.get(`otp:${email}`);
+  if (redisOtp !== otp) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Your OTP is invalid.");
+  }
   return {};
 };
 
