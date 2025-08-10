@@ -33,4 +33,5 @@ export interface IUser {
   auths: IAuthsProvider[];
   bookings?: Types.ObjectId[];
   guides?: Types.ObjectId[];
+  createdAt?: Date;
 }
