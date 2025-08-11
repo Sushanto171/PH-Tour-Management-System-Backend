@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios from "axios";
 import httpStatus from "http-status-codes";
 import { envVars } from "../../config/env";
 import { AppError } from "../../errorHelpers/AppError";
+import { Payment } from "../payment/payment.model";
 import { ISSLCommerz } from "./sslCommerz.interface";
 
 const sslPaymentInit = async (payload: ISSLCommerz) => {
@@ -15,7 +17,7 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       success_url: `${envVars.SSL.SSL_BACKEND_SUCCESS_URL}?transactionId=${payload.transactionId}&amount=${payload.amount}&status=success`,
       cancel_url: `${envVars.SSL.SSL_BACKEND_CANCEL_URL}?transactionId=${payload.transactionId}&amount=${payload.amount}&status=canceled`,
       fail_url: `${envVars.SSL.SSL_BACKEND_FAIL_URL}?transactionId=${payload.transactionId}&amount=${payload.amount}&status=failed`,
-      // ipn_url: "http://localhost:3030/ipn",
+      ipn_url: envVars.SSL.SSL_IPN_URL,
       shipping_method: "N/A",
       product_name: "Tour",
       product_category: "Service",
@@ -45,12 +47,32 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
     return response.data;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     throw new AppError(httpStatus.BAD_REQUEST, error.message);
   }
 };
 
+const validatePayment = async (payload: any) => {
+  try {
+    const response = await axios({
+      method: "GET",
+      url: `${envVars.SSL.SSL_VALIDATION_API}?val_id=${payload.val_id}&store_id=${envVars.SSL.SSL_STORE_ID}&store_passwd=${envVars.SSL.SSL_STORE_PASS}`,
+    });
+    console.log("ssl Payment validation response:", response.data);
+    await Payment.findOneAndUpdate(
+      { transactionId: response.data.tran_id },
+      { paymentGatewayData: response.data },
+      {
+        runValidators: true,
+      }
+    );
+  } catch (error: any) {
+    console.log("Payment validation error:", error.message);
+    throw new AppError(500, "Payment validation error");
+  }
+};
+
 export const sslCommerzService = {
   sslPaymentInit,
+  validatePayment,
 };

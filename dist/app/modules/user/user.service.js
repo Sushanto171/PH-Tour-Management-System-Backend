@@ -8,29 +8,108 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userService = void 0;
+const http_status_codes_1 = __importDefault(require("http-status-codes"));
+const env_1 = require("../../config/env");
+const multer_config_1 = require("../../config/multer.config");
+const AppError_1 = require("../../errorHelpers/AppError");
+const bcrypt_1 = require("../../utils/bcrypt");
+const user_interface_1 = require("./user.interface");
 const user_model_1 = require("./user.model");
 const createUser = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, email } = payload;
-    const user = yield user_model_1.User.create({ name, email });
+    const { email, password } = payload, rest = __rest(payload, ["email", "password"]);
+    // const isUserExist = await User.findOne({ email });
+    // if (isUserExist) {
+    //   throw new AppError(httpStatus.BAD_REQUEST, "This email already exist.");
+    // }
+    const authProvider = {
+        provider: "credential",
+        providerId: email,
+    };
+    const hashedPassword = yield (0, bcrypt_1.generateHashedPassword)(password, env_1.envVars.BCRYPT_SALT_ROUND_ROUND);
+    const user = yield user_model_1.User.create(Object.assign({ email, password: hashedPassword, auths: [authProvider] }, rest));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _a = user.toObject(), { password: pass } = _a, response = __rest(_a, ["password"]);
+    return response;
+});
+const getUserById = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId).select("-password");
+    if (!user) {
+        throw new AppError_1.AppError(http_status_codes_1.default.BAD_REQUEST, "User id does not exist");
+    }
     return user;
 });
-const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_model_1.User.findOne({ email });
+const getMe = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    const user = yield user_model_1.User.findById(userId).select("-password");
+    if (!user) {
+        throw new AppError_1.AppError(http_status_codes_1.default.BAD_REQUEST, "User id does not exist");
+    }
     return user;
 });
-const updateUser = (req) => __awaiter(void 0, void 0, void 0, function* () {
-    const email = req.params.email;
-    const data = req.body;
-    const user = yield user_model_1.User.findOneAndUpdate({ email }, data, {
+const updateUser = (userId, payload, decodedToken) => __awaiter(void 0, void 0, void 0, function* () {
+    if (decodedToken.role === user_interface_1.Role.GUIDE || decodedToken.role === user_interface_1.Role.USER) {
+        if (decodedToken.userId !== userId) {
+            throw new AppError_1.AppError(http_status_codes_1.default.UNAUTHORIZED, "Your are unauthorized.");
+        }
+    }
+    const isUserExist = yield user_model_1.User.findById(userId);
+    if (!isUserExist) {
+        throw new AppError_1.AppError(http_status_codes_1.default.NOT_FOUND, "User does not find");
+    }
+    if (decodedToken.role === user_interface_1.Role.ADMIN &&
+        isUserExist.role === user_interface_1.Role.SUPER_ADMIN) {
+        throw new AppError_1.AppError(http_status_codes_1.default.UNAUTHORIZED, "Your are unauthorized.");
+    }
+    if (payload.role) {
+        if (decodedToken.role === user_interface_1.Role.USER || decodedToken.role === user_interface_1.Role.GUIDE) {
+            throw new AppError_1.AppError(http_status_codes_1.default.FORBIDDEN, "You are not authorized");
+        }
+        // if (decodedToken.role === Role.ADMIN && payload.role === Role.SUPER_ADMIN) {
+        //   throw new AppError(httpStatus.FORBIDDEN, "You are not authorized");
+        // }
+    }
+    if (payload.isActive || payload.isDeleted || payload.isVerified) {
+        if (decodedToken.role === user_interface_1.Role.USER || decodedToken.role === user_interface_1.Role.GUIDE) {
+            throw new AppError_1.AppError(http_status_codes_1.default.FORBIDDEN, "You are not authorized");
+        }
+    }
+    const user = yield user_model_1.User.findByIdAndUpdate(userId, payload, {
         new: true,
         runValidators: true,
-    });
+    }).select("-password");
+    if (payload.picture && isUserExist.picture) {
+        yield (0, multer_config_1.deleteImageFromCloudinary)(isUserExist.picture);
+    }
     return user;
+});
+const getAllUsers = () => __awaiter(void 0, void 0, void 0, function* () {
+    const users = yield user_model_1.User.find({}).select("-password");
+    const total = yield user_model_1.User.countDocuments();
+    const data = {
+        users,
+        totalUsers: { total },
+    };
+    return data;
 });
 exports.userService = {
     createUser,
-    getUserByEmail,
+    getMe,
     updateUser,
+    getAllUsers,
+    getUserById
 };

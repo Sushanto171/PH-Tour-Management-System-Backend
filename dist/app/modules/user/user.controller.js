@@ -14,55 +14,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.userController = void 0;
 const http_status_codes_1 = __importDefault(require("http-status-codes"));
+const catchAsync_1 = require("../../utils/catchAsync");
+const sendResponse_1 = require("../../utils/sendResponse");
 const user_service_1 = require("./user.service");
-const getUserByEmail = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user = yield user_service_1.userService.getUserByEmail(req.params.email);
-        res.status(http_status_codes_1.default.OK).json({
-            message: "User retrieved successfully",
-            user,
-        });
-    }
-    catch (error) {
-        next(error);
-        // res.status(httpStatus.BAD_REQUEST).json({
-        //   message: `Something went wrong ${error.message}`,
-        //   error,
-        // });
-    }
-});
-const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user = yield user_service_1.userService.createUser(req.body);
-        res.status(http_status_codes_1.default.CREATED).json({
-            message: "User created successfully.",
-            user,
-        });
-    }
-    catch (error) {
-        res.status(http_status_codes_1.default.BAD_REQUEST).json({
-            message: `Something went wrong ${error.massage}`,
-            error,
-        });
-    }
-});
-const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user = yield user_service_1.userService.updateUser(req);
-        res.status(http_status_codes_1.default.OK).json({
-            message: "User updated successfully ",
-            user,
-        });
-    }
-    catch (error) {
-        res.status(http_status_codes_1.default.BAD_REQUEST).json({
-            message: `Something went wrong ${error.message}`,
-            error,
-        });
-    }
-});
+const getAllUsers = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield user_service_1.userService.getAllUsers();
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "All users retrieved successfully",
+        data: result.users,
+        meta: result.totalUsers,
+    });
+}));
+const getMe = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const decodedToken = req.user;
+    const user = yield user_service_1.userService.getMe(decodedToken.userId);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "Your profile retrieved successfully",
+        data: user,
+    });
+}));
+const getUserById = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req.params.id;
+    const user = yield user_service_1.userService.getUserById(userId);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "User retrieved successfully",
+        data: user,
+    });
+}));
+const createUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const payload = Object.assign(Object.assign({}, req.body), { picture: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path });
+    const user = yield user_service_1.userService.createUser(payload);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.CREATED,
+        success: true,
+        message: "User created successfully",
+        data: user,
+    });
+}));
+const updateUser = (0, catchAsync_1.catchAsync)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const id = req.params.id;
+    const payload = Object.assign(Object.assign({}, req.body), { picture: (_a = req.file) === null || _a === void 0 ? void 0 : _a.path });
+    const decodedToken = req.user;
+    const user = yield user_service_1.userService.updateUser(id, payload, decodedToken);
+    (0, sendResponse_1.sendResponse)(res, {
+        statusCode: http_status_codes_1.default.OK,
+        success: true,
+        message: "User updated successfully",
+        data: user,
+    });
+}));
 exports.userController = {
     createUser,
-    getUserByEmail,
+    getMe,
     updateUser,
+    getAllUsers,
+    getUserById,
 };

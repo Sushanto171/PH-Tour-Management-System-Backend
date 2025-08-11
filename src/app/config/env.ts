@@ -28,6 +28,7 @@ interface RequiredEnv {
     SSL_FRONTEND_SUCCESS_URL: string;
     SSL_FRONTEND_CANCEL_URL: string;
     SSL_FRONTEND_FAIL_URL: string;
+    SSL_IPN_URL: string;
   };
   CLOUDINARY: {
     CLOUDINARY_CLOUD_NAME: string;
@@ -92,6 +93,7 @@ const loadEnvVariables = (): RequiredEnv => {
     "REDIS_PORT",
     "TWILIO_ACCOUNT_SIID",
     "TWILIO_AUTH_TOKEN",
+    "SSL_IPN_URL",
   ];
   requiredEnvVariables.forEach((key) => {
     if (!process.env[key]) throw new Error(`Missing env variable: ${key}`);
@@ -124,6 +126,7 @@ const loadEnvVariables = (): RequiredEnv => {
       SSL_FRONTEND_SUCCESS_URL: process.env.SSL_FRONTEND_SUCCESS_URL as string,
       SSL_FRONTEND_CANCEL_URL: process.env.SSL_FRONTEND_CANCEL_URL as string,
       SSL_FRONTEND_FAIL_URL: process.env.SSL_FRONTEND_FAIL_URL as string,
+      SSL_IPN_URL: process.env.SSL_IPN_URL as string,
     },
     CLOUDINARY: {
       CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME as string,

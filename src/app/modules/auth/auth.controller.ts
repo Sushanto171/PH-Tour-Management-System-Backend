@@ -139,7 +139,8 @@ const googleCallbackController = catchAsync(async (req, res) => {
     throw new AppError(httpStatus.NOT_FOUND, "User does not found");
   }
   const logInfo = createUserToken(user);
-  setAuthCookie(res, logInfo);
+  console.log(logInfo);
+  await setAuthCookie(res, logInfo);
   res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
 });
 

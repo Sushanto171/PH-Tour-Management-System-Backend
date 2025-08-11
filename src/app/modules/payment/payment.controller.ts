@@ -2,6 +2,7 @@ import { JwtPayload } from "jsonwebtoken";
 import { envVars } from "../../config/env";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { sslCommerzService } from "../sslCommerz/sslCommerz.service";
 import { paymentService } from "./payment.service";
 
 const initPayment = catchAsync(async (req, res) => {
@@ -66,10 +67,22 @@ const getInvoiceUrl = catchAsync(async (req, res) => {
   });
 });
 
+const validatePayment = catchAsync(async (req, res) => {
+  console.log("sslcommerz ipn url body:", req.body);
+  await sslCommerzService.validatePayment(req.body);
+  sendResponse(res, {
+    success: true,
+    statusCode: 200,
+    message: "Payment validate successfully.",
+    data: null,
+  });
+});
+
 export const paymentController = {
   initPayment,
   successPayment,
   cancelPayment,
   failPayment,
   getInvoiceUrl,
+  validatePayment,
 };
